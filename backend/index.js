@@ -1,9 +1,17 @@
 import express from 'express';
 import cors from 'cors';
 import sqlite3 from 'sqlite3';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-const db = new sqlite3.Database('./database.sqlite');
+const dbPath = process.env.NODE_ENV === 'production' 
+  ? '/app/data/database.sqlite' 
+  : './database.sqlite';
+const db = new sqlite3.Database(dbPath);
 
 app.use(cors());
 app.use(express.json());
@@ -41,4 +49,4 @@ app.delete('/api/items/:id', (req, res) => {
 });
 
 const PORT = 4000;
-app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Backend running on port ${PORT}`));

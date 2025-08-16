@@ -5,14 +5,14 @@ function App() {
   const [text, setText] = useState('');
 
   useEffect(() => {
-    fetch('http://localhost:4000/api/items')
+    fetch('/api/items')
       .then(res => res.json())
       .then(setItems);
   }, []);
 
   const addItem = async (e) => {
     e.preventDefault();
-    const res = await fetch('http://localhost:4000/api/items', {
+    const res = await fetch('/api/items', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text })
@@ -23,7 +23,7 @@ function App() {
   };
 
   const deleteItem = async (id) => {
-    await fetch(`http://localhost:4000/api/items/${id}`, { method: 'DELETE' });
+    await fetch(`/api/items/${id}`, { method: 'DELETE' });
     setItems(items.filter(i => i.id !== id));
   };
 

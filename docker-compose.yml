@@ -1,27 +1,18 @@
-services:
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:80"
-    depends_on:
-      - backend
-    networks:
-      - app-network
+version: '3.8'
 
+services:
   backend:
     build: ./backend
     ports:
       - "4000:4000"
     environment:
       - NODE_ENV=production
-    volumes:
-      - backend_data:/app/data
-    networks:
-      - app-network
+    restart: unless-stopped
 
-networks:
-  app-network:
-    driver: bridge
-
-volumes:
-  backend_data:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

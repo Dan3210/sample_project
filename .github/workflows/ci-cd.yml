@@ -31,9 +31,13 @@ jobs:
         with:
           node-version: '18'
       - name: Build frontend Docker image
-        run: docker build -t frontend ./frontend
+        run: |
+          cd frontend
+          docker build -t frontend .
       - name: Build backend Docker image
-        run: docker build -t backend ./backend
+        run: |
+          cd backend
+          docker build -t backend .
 
   test:
     runs-on: ubuntu-latest

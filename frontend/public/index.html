@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Todo App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        button {
+            padding: 0.5rem 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.delete {
+            background-color: #dc3545;
+            margin-left: 0.5rem;
+        }
+        button.delete:hover {
+            background-color: #c82333;
+        }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 0.5rem;
+        }
+        .status {
+            margin: 1rem 0;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simple Todo App</h1>
+        <div id="status"></div>
+        
+        <div class="form-group">
+            <input type="text" id="itemText" placeholder="Enter a new todo item" required>
+            <button onclick="addItem()">Add Item</button>
+        </div>
+        
+        <div id="itemsList"></div>
+    </div>
+
+    <script>
+        const API_URL = '/api/items';
+        
+        // Load items on page load
+        loadItems();
+        
+        // Load items from API
+        async function loadItems() {
+            try {
+                const response = await fetch(API_URL);
+                const items = await response.json();
+                displayItems(items);
+                showStatus(`Loaded ${items.length} items`, 'success');
+            } catch (error) {
+                showStatus(`Error loading items: ${error.message}`, 'error');
+            }
+        }
+        
+        // Display items in the list
+        function displayItems(items) {
+            const container = document.getElementById('itemsList');
+            if (items.length === 0) {
+                container.innerHTML = '<p>No items yet. Add one above!</p>';
+                return;
+            }
+            
+            container.innerHTML = items.map(item => `
+                <div class="item">
+                    <span>${item.text}</span>
+                    <button class="delete" onclick="deleteItem(${item.id})">Delete</button>
+                </div>
+            `).join('');
+        }
+        
+        // Add new item
+        async function addItem() {
+            const text = document.getElementById('itemText').value.trim();
+            if (!text) {
+                showStatus('Please enter some text', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const newItem = await response.json();
+                showStatus(`Added: ${newItem.text}`, 'success');
+                document.getElementById('itemText').value = '';
+                loadItems();
+            } catch (error) {
+                showStatus(`Error adding item: ${error.message}`, 'error');
+            }
+        }
+        
+        // Delete item
+        async function deleteItem(id) {
+            try {
+                const response = await fetch(`${API_URL}/${id}`, { 
+                    method: 'DELETE' 
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                showStatus('Item deleted', 'success');
+                loadItems();
+            } catch (error) {
+                showStatus(`Error deleting item: ${error.message}`, 'error');
+            }
+        }
+        
+        // Show status message
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            setTimeout(() => {
+                status.textContent = '';
+                status.className = 'status';
+            }, 3000);
+        }
+        
+        // Allow Enter key to add items
+        document.getElementById('itemText').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addItem();
+            }
+        });
+    </script>
+</body>
+</html>

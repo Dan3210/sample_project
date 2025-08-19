@@ -34,6 +34,12 @@ tfplan.*
 .terraformrc
 terraform.rc
 
+# Kubernetes and Minikube
+minikube-linux-amd64
+minikube-*
+.kube/
+*.kubeconfig
+
 # Node.js
 node_modules/
 npm-debug.log*

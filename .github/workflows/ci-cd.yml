@@ -33,6 +33,8 @@ jobs:
       - name: Build frontend Docker image
         run: |
           cd frontend
+          ls -la
+          ls -la public/
           docker build -t frontend .
       - name: Build backend Docker image
         run: |
